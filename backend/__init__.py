@@ -15,6 +15,10 @@ from .visualizer import BandwidthVisualizer
 from .benchmark_algorithms import BenchmarkAlgorithms
 from .data_generator_enhanced import EnhancedDataGenerator
 from .tier_optimizer import TierBasedOptimizer
+from .unified_optimizer import UnifiedOptimizer, ConvergenceTracker
+from .convergence_visualizer import ConvergenceVisualizer
+from .network_topology_optimizer import NetworkTopologyOptimizer, NetworkNode, NetworkLink, TrafficDemand
+from .network_visualizer import NetworkVisualizer
 
 __all__ = [
     'CoreOptimizer',
@@ -26,5 +30,13 @@ __all__ = [
     'BandwidthVisualizer',
     'BenchmarkAlgorithms',
     'EnhancedDataGenerator',
-    'TierBasedOptimizer'
+    'TierBasedOptimizer',
+    'UnifiedOptimizer',
+    'ConvergenceTracker',
+    'ConvergenceVisualizer',
+    'NetworkTopologyOptimizer',
+    'NetworkNode',
+    'NetworkLink',
+    'TrafficDemand',
+    'NetworkVisualizer'
 ]
