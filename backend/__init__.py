@@ -9,7 +9,6 @@ __author__ = "Optimization Team"
 # Import all optimization modules
 from .core_optimizer import CoreOptimizer, FairnessMetrics
 from .multi_objective import MultiObjectiveOptimizer, ParetoAnalyzer
-from .time_varying import TimeVaryingOptimizer, TemporalAnalyzer
 from .robust_optimizer import RobustOptimizer
 from .data_generator import DataGenerator
 from .visualizer import BandwidthVisualizer
@@ -22,8 +21,6 @@ __all__ = [
     'FairnessMetrics',
     'MultiObjectiveOptimizer',
     'ParetoAnalyzer',
-    'TimeVaryingOptimizer',
-    'TemporalAnalyzer',
     'RobustOptimizer',
     'DataGenerator',
     'BandwidthVisualizer',

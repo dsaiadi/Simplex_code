@@ -22,20 +22,6 @@ def main():
     users_df = DataGenerator.generate_users(n_users=10000)
     print(f"✓ Generated {len(users_df)} users")
     
-    # Generate temporal demands (24 hours)
-    print("Generating 24-hour temporal demand patterns...")
-    temporal_demands = DataGenerator.generate_temporal_demands(users_df, time_slots=24)
-    print(f"✓ Generated temporal demands: {temporal_demands.shape}")
-    
-    # Generate network capacity
-    print("Generating network capacity profile...")
-    capacities = DataGenerator.generate_network_capacity(
-        time_slots=24,
-        base_capacity=50000.0,
-        pattern='realistic'
-    )
-    print(f"✓ Generated capacity profile")
-    
     # Generate uncertainty scenarios
     print("Generating uncertainty scenarios...")
     uncertainty_data = DataGenerator.generate_uncertainty_scenarios(
@@ -44,39 +30,25 @@ def main():
     )
     print(f"✓ Generated uncertainty data")
     
-    # Export to Excel
-    print("\nExporting data to Excel...")
-    output_file = "data/bandwidth_allocation_10000_users.xlsx"
+    # Export to CSV
+    print("\nExporting data to CSV...")
+    output_file = "data/bandwidth_allocation_10000_users.csv"
     
     # Create data directory if it doesn't exist
     os.makedirs("data", exist_ok=True)
     
-    DataGenerator.export_to_excel(users_df, temporal_demands, output_file)
+    users_df.to_csv(output_file, index=False)
     print(f"✓ Exported to {output_file}")
     
-    # Export additional data
-    print("\nExporting additional datasets...")
-    
-    # Capacity data
-    capacity_df = pd.DataFrame({
-        'Hour': range(24),
-        'Capacity_Mbps': capacities,
-        'Time_Label': [f"{h:02d}:00" for h in range(24)]
-    })
-    
-    # Uncertainty data
+    # Export uncertainty data
+    print("\nExporting uncertainty data...")
     uncertainty_df = pd.DataFrame({
         'user_id': users_df['user_id'],
         'nominal_demand': uncertainty_data['nominal_demands'],
         'demand_deviation': uncertainty_data['demand_deviations']
     })
-    
-    # Save additional sheets
-    with pd.ExcelWriter(output_file, mode='a', engine='openpyxl') as writer:
-        capacity_df.to_excel(writer, sheet_name='Capacity_Profile', index=False)
-        uncertainty_df.to_excel(writer, sheet_name='Uncertainty_Data', index=False)
-    
-    print(f"✓ Added additional data sheets")
+    uncertainty_df.to_csv("data/uncertainty_data.csv", index=False)
+    print(f"✓ Exported uncertainty data")
     
     # Generate summary statistics
     print("\n" + "=" * 80)
@@ -91,9 +63,6 @@ def main():
     print(users_df['user_type_name'].value_counts())
     print(f"\nPriority Distribution:")
     print(users_df['priority'].value_counts().sort_index())
-    print(f"\nAverage Network Capacity: {capacities.mean():.0f} Mbps")
-    print(f"Peak Capacity: {capacities.max():.0f} Mbps")
-    print(f"Off-peak Capacity: {capacities.min():.0f} Mbps")
     print("\n" + "=" * 80)
     print("✓ Data generation completed successfully!")
     print("=" * 80)

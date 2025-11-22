@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 from backend.core_optimizer import CoreOptimizer, FairnessMetrics
 from backend.multi_objective import MultiObjectiveOptimizer
-from backend.time_varying import TimeVaryingOptimizer
 from backend.robust_optimizer import RobustOptimizer
 from backend.data_generator import DataGenerator
 
@@ -70,30 +69,8 @@ except Exception as e:
     print(f"   ✗ Error: {str(e)}")
 print()
 
-# Test 3: Time-Varying Optimization
-print("4. Testing Time-Varying Optimization...")
-try:
-    temporal_demands = DataGenerator.generate_temporal_demands(users_df, time_slots=24)
-    capacities = DataGenerator.generate_network_capacity(24, total_capacity, 'realistic')
-    
-    tv_optimizer = TimeVaryingOptimizer(n_users, time_slots=24)
-    result = tv_optimizer.optimize_temporal(
-        temporal_demands, priorities, capacities, min_bw, max_bw, temporal_fairness_threshold=0.8
-    )
-    
-    if result['status'] == 'optimal':
-        print(f"   ✓ Temporal optimization successful")
-        print(f"   ✓ Avg utilization: {result['metrics']['avg_utilization']*100:.2f}%")
-        print(f"   ✓ Peak utilization: {result['metrics']['peak_utilization']*100:.2f}%")
-        print(f"   ✓ Temporal fairness: {result['metrics']['avg_fairness']:.4f}")
-    else:
-        print(f"   ✗ Optimization failed")
-except Exception as e:
-    print(f"   ✗ Error: {str(e)}")
-print()
-
-# Test 4: Robust Optimization
-print("5. Testing Robust Optimization...")
+# Test 3: Robust Optimization
+print("4. Testing Robust Optimization...")
 try:
     demand_deviations = demands * 0.2  # 20% uncertainty
     

@@ -14,7 +14,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
 
 from backend.core_optimizer import CoreOptimizer, FairnessMetrics
 from backend.multi_objective import MultiObjectiveOptimizer, ParetoAnalyzer
-from backend.time_varying import TimeVaryingOptimizer, TemporalAnalyzer
 from backend.robust_optimizer import RobustOptimizer, UncertaintyGenerator
 from backend.data_generator import DataGenerator
 from backend.visualizer import BandwidthVisualizer, ReportGenerator
@@ -65,8 +64,6 @@ def initialize_session_state():
     """Initialize session state variables."""
     if 'users_df' not in st.session_state:
         st.session_state.users_df = None
-    if 'temporal_demands' not in st.session_state:
-        st.session_state.temporal_demands = None
     if 'optimization_results' not in st.session_state:
         st.session_state.optimization_results = {}
     if 'visualizer' not in st.session_state:
@@ -95,7 +92,6 @@ def main():
             "🏠 Home & Data Generation",
             "⚙️ Core Optimization",
             "🎯 Multi-Objective Optimization",
-            "⏰ Time-Varying Optimization",
             "🛡️ Robust Optimization",
             "🔬 Benchmarking & Comparison",
             "📊 Analysis & Comparison",
@@ -110,8 +106,6 @@ def main():
         core_optimization_page()
     elif page == "🎯 Multi-Objective Optimization":
         multi_objective_page()
-    elif page == "⏰ Time-Varying Optimization":
-        time_varying_page()
     elif page == "🛡️ Robust Optimization":
         robust_optimization_page()
     elif page == "🔬 Benchmarking & Comparison":
@@ -561,96 +555,6 @@ def multi_objective_page():
                     'Latency (ms)': pareto_results['latency_values']
                 })
                 st.dataframe(pareto_df, use_container_width=True)
-
-
-def time_varying_page():
-    """Time-varying optimization page."""
-    st.markdown('<p class="sub-header">⏰ Time-Varying Bandwidth Optimization</p>', unsafe_allow_html=True)
-    
-    if st.session_state.users_df is None or st.session_state.temporal_demands is None:
-        st.warning("⚠️ Please generate dataset with temporal demands first!")
-        return
-    
-    df = st.session_state.users_df
-    temporal_demands = st.session_state.temporal_demands
-    
-    st.markdown("""
-    Optimize bandwidth allocation over a 24-hour time horizon, considering:
-    - **Temporal demand patterns** (business, residential, night users)
-    - **Time-varying capacity**
-    - **Temporal fairness constraints**
-    - **Peak vs off-peak optimization**
-    """)
-    
-    # Parameters
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        n_users = st.slider("Number of Users", 50, min(1000, len(df)), min(200, len(df)))
-        temporal_fairness = st.slider(
-            "Temporal Fairness Threshold",
-            0.5, 1.0, 0.8, 0.05,
-            help="Minimum average allocation ratio over time"
-        )
-    
-    with col2:
-        time_slots = temporal_demands.shape[1]
-        st.write(f"**Time Slots:** {time_slots} hours")
-        
-        capacities = st.session_state.get('capacities', np.ones(time_slots) * 50000)
-        avg_capacity = np.mean(capacities)
-        st.write(f"**Average Capacity:** {avg_capacity:.0f} Mbps")
-    
-    if st.button("⏰ Run Temporal Optimization", use_container_width=True):
-        with st.spinner("Solving time-varying optimization problem..."):
-            subset_df = df.head(n_users)
-            demands_temporal = temporal_demands[:n_users, :]
-            priorities = subset_df['priority'].values
-            min_bw = subset_df['min_bandwidth_mbps'].values
-            max_bw = subset_df['max_bandwidth_mbps'].values
-            
-            optimizer = TimeVaryingOptimizer(n_users, time_slots)
-            
-            result = optimizer.optimize_temporal(
-                demands_temporal,
-                priorities,
-                capacities,
-                min_bw,
-                max_bw,
-                temporal_fairness
-            )
-            
-            if result['status'] == 'optimal':
-                st.success("✅ Temporal optimization completed!")
-                
-                st.session_state.optimization_results['temporal'] = result
-                
-                # Metrics
-                metrics = result['metrics']
-                col1, col2, col3, col4 = st.columns(4)
-                
-                with col1:
-                    st.metric("Avg Utilization", f"{metrics['avg_utilization']*100:.1f}%")
-                with col2:
-                    st.metric("Peak Utilization", f"{metrics['peak_utilization']*100:.1f}%")
-                with col3:
-                    st.metric("Avg Fairness", f"{metrics['avg_fairness']:.4f}")
-                with col4:
-                    st.metric("Solve Time", f"{result['solve_time']:.2f}s")
-                
-                # Visualizations
-                visualizer = st.session_state.visualizer
-                
-                st.markdown("#### 🔥 Temporal Allocation Heatmap")
-                fig_heatmap = visualizer.plot_temporal_heatmap(result['allocation'])
-                st.plotly_chart(fig_heatmap, use_container_width=True)
-                
-                st.markdown("#### 📊 Network Utilization Over Time")
-                fig_util = visualizer.plot_utilization_curve(metrics['utilization_per_slot'])
-                st.plotly_chart(fig_util, use_container_width=True)
-                
-            else:
-                st.error(f"❌ Optimization failed: {result.get('error')}")
 
 
 def robust_optimization_page():
